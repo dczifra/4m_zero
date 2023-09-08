@@ -247,16 +247,6 @@ add_executable(4m_zero
   program/playsettings.cpp
   program/play.cpp
   program/selfplaymanager.cpp
-  surewin/evaluate.cpp
-  surewin/extend.cpp
-  surewin/picker.cpp
-  surewin/picker_heuristic.cpp
-  surewin/position.cpp
-  surewin/rkiss.cpp
-  surewin/surewin_main.cpp
-  surewin/surewin_search.cpp
-  surewin/tt.cpp
-  surewin/types.cpp
   ${GIT_HEADER_FILE_ALWAYS_UPDATED}
   tests/testboardarea.cpp
   tests/testboardbasic.cpp
