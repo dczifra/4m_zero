@@ -169,48 +169,6 @@ struct Table
 	}
 };
 
-struct ThreatHandler 
-{
-    ThreatHandler();
-	ThreatHandler(int boardS, int sixW);
-    ThreatHandler(const ThreatHandler& other);
-    ThreatHandler& operator=(const ThreatHandler&) = default;
-	
-	void init(int boardS, int sixW);
-	void print(uint32_t line);
-	void print(uint32_t line, uint32_t border);
-	void print(const Table&);
-	void print_board_extended(std::ostream& out) const;
-  
-	// Doing and undoing moves
-	void do_move(int m, int side);
-	void undo_move(int m, int side);
-  
-	// Updateing
-	int is_there_a_three (uint32_t line, uint32_t border, int index);
-	int is_there_a_four (uint32_t line, uint32_t border, int index);
-	int is_there_a_free_four (uint32_t line, uint32_t border, int index);
-	int is_there_a_five (uint32_t line, int index);
-	void local_update_of_threats(int m);
-
-	// Generate legal moves for the next_player 
-	void generate_legal_moves(int next_player);
-
-	// Data
-
-	// Data input
-	int boardSize;
-	int six_wins;
-	Table square[2]; // [0 == O, 1 == X]
-	Table legal;
-	uint32_t linear_bit[2][4][MAX_LEN_THREATHANDLER + MAX_LEN_THREATHANDLER - 1]; //[0 == O, 1 == X][0 == E, 1 == N, 2 == NE, 3 == NW][NUMBER_OF_SET]
-	uint32_t border_bit[4][MAX_LEN_THREATHANDLER + MAX_LEN_THREATHANDLER - 1];
-
-	// Data output
-	int five_threat;
-	Table threat[2][3][4]; // [0 == O, 1 == X][0 == ff, 1 == ft, 2 == tt][direction]
-};
-
 
 //TYPES AND CONSTANTS-----------------------------------------------------------------
 
@@ -361,7 +319,6 @@ struct Board
   int y_size;                  //Vertical size of board
   Color colors[MAX_ARR_SIZE];  //Color of each location on the board
   int num_stones;              //Number of stones on the board
-  ThreatHandler threatHandler;
 
   /* PointList empty_list; //List of all empty locations on board */
 

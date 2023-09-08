@@ -246,12 +246,7 @@ void BoardHistory::makeBoardMoveAssumeLegal(Board& board, Loc moveLoc, Player mo
       return;
   }
   
-  board.threatHandler.generate_legal_moves((int(movePla) - 1)^1);
-  
-  // If there are no legal moves movePla is the winner
-  if (!(!(board.threatHandler.legal)))
-  {
-	  endGameNow(movePla);
-    return;
-  }
+  // HAS TO BE IMPLEMENTED
+  // Generate legal moves. Call endGameNow according to result.
+  return;
 }

@@ -923,8 +923,10 @@ void NNInputs::fillRowV7(
         setRowBin(rowBin,pos,2, 1.0f, posStride, featureStride);
     }
   }
+
+  // HAS TO BE IMPLEMENTED
   //Feature 3 player all ff
-  {
+/*   {
     Table loop = board.threatHandler.threat[(pla - 1)][0][0];
 
     for (int dir = 1; dir < 4; dir++)
@@ -1026,7 +1028,7 @@ void NNInputs::fillRowV7(
         setRowBin(rowBin,pos, 21, 1.0f, posStride, featureStride);
       }
     }
-  }
+  } */
   //Global features. NOT USED
   // rowGlobal[0] = 1.0f;
 }
