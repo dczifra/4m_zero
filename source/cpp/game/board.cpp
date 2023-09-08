@@ -16,7 +16,7 @@
 
 using namespace std;
 
-const int Table::index64[64] = 
+const int BitBoard::index64[64] = 
 {
 	0, 47,  1, 56, 48, 27,  2, 60,
 	57, 49, 41, 37, 28, 16,  3, 61,
@@ -28,14 +28,14 @@ const int Table::index64[64] =
 	13, 18,  8, 12,  7,  6,  5, 63
 };
 
-Table::Table()
+BitBoard::BitBoard()
 {
   null();
 }
 
-Table::Table(const Table& other)
+BitBoard::BitBoard(const BitBoard& other)
 {
-	memcpy(t, other.t, sizeof(uint64_t)*8);
+	memcpy(t, other.t, sizeof(uint64_t)*2);
 }
 
 //STATIC VARS-----------------------------------------------------------------------------
@@ -194,16 +194,16 @@ void Board::initBoardStruct()
   IS_INITALIZED = true;
 }
 
-std::vector<std::vector<Table>> getWinningSetsImpl()
+std::vector<std::vector<BitBoard>> getWinningSetsImpl()
 {
 	int m = M_LEN;
-	std::vector<std::vector<Table>> ret(4);
+	std::vector<std::vector<BitBoard>> ret(4);
 	return ret;		
 }
 
-const std::vector<std::vector<Table>>& Board::getWinningSets()
+const std::vector<std::vector<BitBoard>>& Board::getWinningSets()
 {
-	static std::vector<std::vector<Table>> ret = getWinningSetsImpl();
+	static std::vector<std::vector<BitBoard>> ret = getWinningSetsImpl();
 	return ret;
 }
 
@@ -676,5 +676,19 @@ Board Board::parseBoard(int xSize, int ySize, const string& s, char lineDelimite
 
 void Board::updateState()
 {
+	const auto& winningSets = getWinningSets();
+	int p = num_stones % 2; // player on move 0 = O, 1 = X
+    state.O.null();
+	state.X.null();
+	
+	for(int y = 0; y<y_size; y++) {
+      for(int x = 0; x<x_size; x++) {
+        Loc loc = Location::getLoc(x,y,x_size);
+        if(colors[loc] == C_BLACK)
+          EXPAND(state.O, y * x_size + x);
+        else if (colors[loc] == C_WHITE)
+          EXPAND(state.X, y * x_size + x);
+      }
+    }
 	return;
 }

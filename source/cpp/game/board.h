@@ -16,11 +16,19 @@
 
 #define M_LEN COMPILE_MAX_BOARD_LEN
 
-struct Table
+#define TIDX(a) ((a) >> 6)
+#define BITINDEX(a) ((a) - (((a) >> 6) << 6))
+#define SUBBOARD(a) (1ULL << BITINDEX((a)))
+#define EXPAND(a, s) (a.t[TIDX(s)] |= SUBBOARD(s))
+#define REDUCE(a, s) (a.t[TIDX(s)] ^= SUBBOARD(s))
+#define REDUCE_DELETE(a, s) (a.t[TIDX(s)] &= (~SUBBOARD(s)))
+#define IS_ELEMENT(a, s) (bool(a.t[TIDX(s)] & SUBBOARD(s)))
+
+struct BitBoard
 {
-    Table();
-    Table(const Table& other);
-    Table& operator=(const Table&) = default;
+    BitBoard();
+    BitBoard(const BitBoard& other);
+    BitBoard& operator=(const BitBoard&) = default;
 
 	static const int index64[64];
 	uint64_t t[2];
@@ -37,7 +45,7 @@ struct Table
 		}
 		return false;
 	}
-	inline bool operator==(const Table& rhs)
+	inline bool operator==(const BitBoard& rhs)
 	{
 		if (this -> t[0] == rhs.t[0] && this -> t[1] == rhs.t[1])
 		{
@@ -45,7 +53,7 @@ struct Table
 		}
 		return false;
 	}
-	inline bool operator!=(const Table& rhs)
+	inline bool operator!=(const BitBoard& rhs)
 	{
 		if (this -> t[0] == rhs.t[0] && this -> t[1] == rhs.t[1])
 		{
@@ -53,29 +61,29 @@ struct Table
 		}
 		return true;
 	}				
-	inline Table operator|=(const Table& rhs)
+	inline BitBoard operator|=(const BitBoard& rhs)
 	{
 		this -> t[0] |= rhs.t[0];
 		this -> t[1] |= rhs.t[1];
 		return * this;
 	}
-	inline Table operator~()
+	inline BitBoard operator~()
 	{
-		Table ret;
+		BitBoard ret;
 		ret.t[0] = (~(this->t[0]));
 		ret.t[1] = (~(this->t[1]));
 		return ret;
 	}
-	inline Table operator&(const Table& rhs)
+	inline BitBoard operator&(const BitBoard& rhs)
 	{
-		Table ret;
+		BitBoard ret;
 		ret.t[0] = (this -> t[0] & rhs.t[0]);
 		ret.t[1] = (this -> t[1] & rhs.t[1]);
 		return ret;
 	}
-	inline Table operator|(const Table& rhs)
+	inline BitBoard operator|(const BitBoard& rhs)
 	{
-		Table ret;
+		BitBoard ret;
 		ret.t[0] = (this -> t[0] | rhs.t[0]);
 		ret.t[1] = (this -> t[1] | rhs.t[1]);
 		return ret;
@@ -126,12 +134,12 @@ struct Table
 // This will after inint and every times Board.colors is changing
 struct State
 {
-	Table O;
-	Table X;
-	Table threat;
-	Table forceMoves[4];
+	BitBoard O;
+	BitBoard X;
+	BitBoard winThreat; // Only O is threatening
+	BitBoard forcingMoves[4];
 	int winningSetsLeft;
-	Table legal;
+	BitBoard legal;
 };
 
 
@@ -277,7 +285,7 @@ struct Board
   static Board parseBoard(int xSize, int ySize, const std::string& s, char lineDelimiter);
   static void printBoard(std::ostream& out, const Board& board, Loc markLoc, const std::vector<Move>* hist);
   static std::string toStringSimple(const Board& board, char lineDelimiter);
-  static const std::vector<std::vector<Table>>& getWinningSets();
+  static const std::vector<std::vector<BitBoard>>& getWinningSets();
   //Data--------------------------------------------
 
   int x_size;                  //Horizontal size of board
