@@ -260,6 +260,54 @@ static std::vector<std::vector<BitBoard>> getWinningSetsImpl()
 	ret[3] = curr;
 
 	// Shorts
+	// E 
+	for(int y = 0; y<4; y++) {
+		BitBoard currWinningSet;
+		currWinningSet.null();
+		for (int t = 0; t < 4; t++)
+		{
+			EXPAND(currWinningSet, y * m + t);
+		}
+		ret[0].push_back(currWinningSet);
+		currWinningSet.null();
+		for (int t = 0; t < 4; t++)
+		{
+			EXPAND(currWinningSet, m - 4 + y * m + t);
+		}		
+		ret[0].push_back(currWinningSet);
+    }
+	// NE
+	BitBoard currWinningSet;
+	currWinningSet.null();
+	EXPAND(currWinningSet, 1);
+	EXPAND(currWinningSet, m);
+	ret[2].push_back(currWinningSet);
+	currWinningSet.null();
+	EXPAND(currWinningSet, 2);
+	EXPAND(currWinningSet, m + 1);
+	EXPAND(currWinningSet, 2 * m);
+	ret[2].push_back(currWinningSet);
+	currWinningSet.null();
+	EXPAND(currWinningSet, m + m - 1);
+	EXPAND(currWinningSet, m + 2 * m - 2);
+	EXPAND(currWinningSet, m + 3 * m - 3);
+	ret[2].push_back(currWinningSet);
+
+	// NW
+	currWinningSet.null();
+	EXPAND(currWinningSet, m - 2);
+	EXPAND(currWinningSet, 2 * m - 1);
+	ret[3].push_back(currWinningSet);
+	currWinningSet.null();
+	EXPAND(currWinningSet, m - 3);
+	EXPAND(currWinningSet, 2 * m - 2);
+	EXPAND(currWinningSet, 3 * m - 1);
+	ret[3].push_back(currWinningSet);
+	currWinningSet.null();
+	EXPAND(currWinningSet, m);
+	EXPAND(currWinningSet, 2 * m + 1);
+	EXPAND(currWinningSet, 3 * m + 2);
+	ret[3].push_back(currWinningSet);
 	return ret;	
 }
 
@@ -672,6 +720,7 @@ void Board::printBoard(ostream& out, const Board& board, Loc markLoc, const vect
   const auto& t = Board::getWinningSets();
   for (int i = 0; i < 4; i++)
   {
+	out << "newdir\n";
 	for (int j = 0; j < t[i].size(); j++)
 	{
 		t[i][j].print(out);
