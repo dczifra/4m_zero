@@ -717,16 +717,23 @@ void Board::printBoard(ostream& out, const Board& board, Loc markLoc, const vect
     out << "\n";
   }
   //board.state.O.print(out);
-  const auto& t = Board::getWinningSets();
-  for (int i = 0; i < 4; i++)
+  //const auto& t = Board::getWinningSets();
+  const auto& s = board.state;
+  out << "O=\n";
+  s.O.print(out);
+  out << "X=\n";
+  s.X.print(out);
+  out << "winThreat=";
+  s.winThreat.print(out);
+  for (int dir = 0; dir < 4; dir++)
   {
-	out << "newdir\n";
-	for (int j = 0; j < t[i].size(); j++)
-	{
-		t[i][j].print(out);
-		out << "\n";
-	}
+    out << "for dir=" << dir << " forcingMoves=\n";
+    s.forcingMoves[dir].print(out);
   }
+  out << "winningSetsLeft=" << s.winningSetsLeft << "\n";
+  out << "legal=";
+  s.legal.print(out);
+  out << "OFork=" << s.OFork << "\n";
 }
 
 ostream& operator<<(ostream& out, const Board& board) {
@@ -803,7 +810,16 @@ void Board::updateState()
     state.O.null();
 	state.X.null();
 	state.winThreat.null();
+	for (int i = 0; i < 4; i++)
+	{
+		state.forcingMoves[i].null();
+	}
+	state.winningSetsLeft = 0;
+	state.legal.null();
+  state.OFork = false;
 	
+  BitBoard empty;
+  empty.null();
 	for(int y = 0; y<y_size; y++) {
       for(int x = 0; x<x_size; x++) {
         Loc loc = Location::getLoc(x,y,x_size);
@@ -811,9 +827,73 @@ void Board::updateState()
           EXPAND(state.O, y * x_size + x);
         else if (colors[loc] == C_WHITE)
           EXPAND(state.X, y * x_size + x);
+        else
+          EXPAND(empty, y * x_size + x);
       }
     }
+	for (int dir = 0; dir < 4; dir++)
+	{
+		for (const auto& winningSet : winningSets[dir])
+		{
+      
+      if (!(state.X & winningSet))
+      {
+        state.winningSetsLeft++;
+        int winningSetSize = winningSet.count();
+        BitBoard intersect = (state.O & winningSet);
+        int intersectSize = intersect.count();
+        if (intersectSize == winningSetSize - 1)
+        {
+          if (p == 1)
+          {
+            state.winThreat |= (empty & winningSet); 
+          }
+        }
+        if (intersectSize == winningSetSize - 2)
+        {
+          state.forcingMoves[dir] |= (empty & winningSet);
+        }
+      }
+		}
+	}
 
-
+  if (p == 0)
+  {
+    for (int d1 = 0; d1 < 4; d1++)
+    {
+      for (int d2 = d1 + 1; d2 < 4; d2++)
+      {
+        auto fork = (state.forcingMoves[d1] & state.forcingMoves[d2]);
+        if (!(!fork))
+        {
+          state.OFork = true;
+        }
+      }
+    }
+    if (state.winningSetsLeft == 0)
+    {
+      state.legal.null();
+    }
+    else
+    {
+      state.legal = empty;
+    }
+  }
+  if (p == 1)
+  {
+    state.OFork = false;
+    int w = state.winThreat.count();
+    if (w == 0)
+    {
+      state.legal = empty;
+    }
+    else if (w == 1)
+    {
+      state.legal = state.winThreat;
+    }
+    else{
+      state.legal.null();
+    }
+  }
 	return;
 }

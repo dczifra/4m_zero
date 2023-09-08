@@ -101,7 +101,7 @@ struct BitBoard
 		}
 		return -1;
 	}
-	inline int count()
+	inline int count() const
 	{
 		return __builtin_popcountll(t[0]) + __builtin_popcountll(t[1]);
 	}
@@ -141,6 +141,7 @@ struct State
 	BitBoard forcingMoves[4]; //0 == E, 1 == N, 2 == NE, 3 == NW
 	int winningSetsLeft;
 	BitBoard legal;
+	bool OFork;
 };
 
 
