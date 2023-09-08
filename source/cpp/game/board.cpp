@@ -331,7 +331,15 @@ bool Board::isLegal(Loc loc, Player /*pla*/) const
 	{
 		return false;
 	}
-	return true;
+  int x = Location::getX(loc, x_size);
+  int y = Location::getY(loc, x_size);
+  if (IS_ELEMENT(state.legal, y * x_size + x))
+  {
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
 bool Board::isAdjacentToPla(Loc loc, Player pla) const {
