@@ -1,5 +1,4 @@
 #include "main.h"
-#include "../surewin/position.h"
 
 #include "core/os.h"
 
@@ -145,8 +144,6 @@ int main(int argc, const char* argv[]) {
     printHelp(argc,argv);
     return 0;
   }
-
-  Position::initGlobals();
 
 #if defined(OS_IS_WINDOWS)
   //On windows, uncaught exceptions reaching toplevel don't normally get printed out,

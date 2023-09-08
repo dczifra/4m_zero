@@ -17,9 +17,6 @@
 #include "../search/searchparams.h"
 #include "../search/searchprint.h"
 #include "../search/timecontrols.h"
-#include "../surewin/position.h"
-#include "../surewin/picker.h"
-#include "../surewin/picker_heuristic.h"
 
 #include "../external/nlohmann_json/json.hpp"
 
@@ -108,33 +105,12 @@ struct SearchNode {
   SearchNode& operator=(SearchNode&& other) = delete;
 };
 
-struct surewin_tt_entry 
-{	
-	uint64_t hash;
-	int16_t val;
-	uint16_t bestmove;
-	table square[2];
-	uint8_t depth;
-	bool easy;
-	int turn;	
-};
-
 //Per-thread state
 struct SearchThread {
   int threadIdx;
 
   Player pla;
   Board board;
-
-  StateInfo st_surewin[BOARDS*BOARDS];
-  Position root;
-  int surewin_winner_move;
-  struct surewin_tt_entry * surewin_tt;
-  int surewin_tt_size;
-
-
-
-
   BoardHistory history;
 
   Rand rand;
@@ -163,15 +139,6 @@ struct SearchThread {
 
   SearchThread(const SearchThread&) = delete;
   SearchThread& operator=(const SearchThread&) = delete;
-
-  int surewin_tt_setsize(int size);
-  int16_t surewin_tt_probe(Position *, uint16_t *, uint8_t *, bool *); 
-  void surewin_tt_save(Position *, int16_t, uint16_t, uint8_t, bool);
-  void surewin_tt_kill();
-  int surewin_attack(Position* p, int8_t depth_left, uint8_t ply, table attackline, bool easy);
-  int surewin_defense(Position* p, int8_t depth_left, uint8_t ply, table attackline, bool easy);
-  bool surewinSearch(SearchNode& node, int surewinDepth);
-  void initSurewinRoot(Board& board, int pla);
 };
 
 struct Search {

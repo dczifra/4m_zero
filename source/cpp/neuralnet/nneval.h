@@ -123,13 +123,6 @@ class NNEvaluator {
   //Fills supported with true if desiredRules itself was exactly supported, false if some modifications had to be made.
   Rules getSupportedRules(const Rules& desiredRules, bool& supported);
 
-  bool isInCacheTable(Board& board,
-	  const BoardHistory& history,
-	  Player nextPlayer,
-	  const MiscNNInputParams& nnInputParams,
-	  NNResultBuf& buf,
-	  Hash128& nnHash);
-
   //Clear all entires cached in the table
   void clearCache();
 

@@ -955,18 +955,3 @@ void NNCacheTable::clear() {
   }
 }
 
-bool NNEvaluator::isInCacheTable(  Board& board,
-  const BoardHistory& history,
-  Player nextPlayer,
-  const MiscNNInputParams& nnInputParams,
-	NNResultBuf& buf,
-	Hash128& nnHash)
-{
-  nnHash = NNInputs::getHash(board, history, nextPlayer, nnInputParams);
-
-  if (nnCacheTable != NULL && nnCacheTable->get(nnHash,buf.result)) {
-	  buf.hasResult = true;
-	  return true;
-  }
-  return false;
-}
