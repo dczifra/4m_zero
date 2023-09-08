@@ -222,7 +222,6 @@ bool BoardHistory::makeBoardMoveTolerant(Board& board, Loc moveLoc, Player moveP
 
 void BoardHistory::makeBoardMoveAssumeLegal(Board& board, Loc moveLoc, Player movePla) {
   //If somehow we're making a move after the game was ended, just clear those values and continue
-  // HAS TO BE IMPLEMENTED?
   isGameFinished = false;
   winner = C_EMPTY;
   isNoResult = false;
@@ -239,7 +238,11 @@ void BoardHistory::makeBoardMoveAssumeLegal(Board& board, Loc moveLoc, Player mo
   numTurns += 1;
   presumedNextMovePla = getOpp(movePla);
   wasEverOccupiedOrPlayed[moveLoc] = true;
-  if (!(board.state.legal))
+  if (board.state.OFork)
+  {
+    endGameNow(P_BLACK);
+  }
+  if (!(!board.state.legal))
   {
     endGameNow(movePla);
   }

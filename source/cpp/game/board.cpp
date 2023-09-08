@@ -196,7 +196,6 @@ void Board::initBoardStruct()
 
 static std::vector<std::vector<BitBoard>> getWinningSetsImpl()
 {
-	// HAS TO BE IMPLEMENTED
 	int m = RULE_M;
 	std::vector<std::vector<BitBoard>> ret(4);
 
@@ -804,7 +803,6 @@ Board Board::parseBoard(int xSize, int ySize, const string& s, char lineDelimite
 
 void Board::updateState()
 {
-	// HAS TO BE IMPLEMENTED
 	const auto& winningSets = getWinningSets();
 	int p = num_stones % 2; // player on move 0 = O, 1 = X
     state.O.null();
