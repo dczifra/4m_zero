@@ -519,7 +519,7 @@ void GameInitializer::createGameSharedUnsynchronized(
     posSample = startPosSample;
 
   if(posSample == NULL) {
-    if (forGateKeeper) 
+    if (false) 
     {
       posSample = &(startPoses[gameNumber]);
     }
@@ -1140,15 +1140,14 @@ static void initializeGameUsingPolicy(
   int numInitialMovesToPlay = (int)floor(gameRand.nextExponential() * (board.x_size * board.y_size * proportionOfBoardArea));
   assert(numInitialMovesToPlay >= 0);
   for(int i = 0; i<numInitialMovesToPlay; i++) {
+    if(hist.isGameFinished)
+      break;
     Loc loc = getGameInitializationMove(botB, botW, board, hist, pla, buf, gameRand, temperature);
 
     //Make the move!
     assert(hist.isLegal(board,loc,pla));
     hist.makeBoardMoveAssumeLegal(board,loc,pla);
     pla = getOpp(pla);
-
-    if(hist.isGameFinished)
-      break;
   }
 }
 
@@ -1527,7 +1526,8 @@ FinishedGameData* Play::runGame(
       double temperature = 1.0;
       initializeGameUsingPolicy(botB, botW, board, hist, pla, gameRand, doEndGameIfAllPassAlive, proportionOfBoardArea, temperature);
       if(playSettings.compensateAfterPolicyInitProb > 0.0 && gameRand.nextBool(playSettings.compensateAfterPolicyInitProb)) {
-        PlayUtils::adjustKomiToEven(botB,botW,board,hist,pla,playSettings.compensateKomiVisits,logger,otherGameProps,gameRand);
+        if(!hist.isGameFinished)
+          PlayUtils::adjustKomiToEven(botB,botW,board,hist,pla,playSettings.compensateKomiVisits,logger,otherGameProps,gameRand);
       }
     }
   }

@@ -8,7 +8,7 @@ logToStdout = true
 
 # Data writing-----------------------------------------------------------------------------------
 
-dataBoardLen = 19
+dataBoardLen = 20
 maxDataQueueSize = 2000
 maxRowsPerTrainFile = 25000
 maxRowsPerValFile = 5000

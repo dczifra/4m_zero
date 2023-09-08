@@ -879,6 +879,10 @@ void Board::updateState()
     {
       state.legal.null();
     }
+    else if ((!state.forks))
+    {
+      state.legal = state.forks;
+    }
     else
     {
       state.legal = empty;

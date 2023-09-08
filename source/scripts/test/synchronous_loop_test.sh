@@ -95,7 +95,7 @@ do
     echo "Gatekeeper"
     time ./4m_zero gatekeeper -rejected-models-dir "$BASEDIR"/rejectedmodels -accepted-models-dir "$BASEDIR"/models/ -sgf-output-dir "$BASEDIR"/gatekeepersgf/ -test-models-dir "$BASEDIR"/modelstobetested/ -config "$DATED_ARCHIVE"/gatekeeper.cfg -quit-if-no-nets-to-test | tee -a "$BASEDIR"/gatekeepersgf/stdout.txt
     if [ -z "$(ls -A "$SELFPLAY_FOLDER/models")" ] && [ -z "$(ls -A "$SELFPLAY_FOLDER/rejectedmodels")" ]; then
-        if (( $COUNTER > 2 )); then
+        if (( $COUNTER > 4 )); then
             echo "Could not create model in $SELFPLAY_FOLDER/models"
             exit 1
         fi
