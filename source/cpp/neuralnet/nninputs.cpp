@@ -914,52 +914,36 @@ void NNInputs::fillRowV7(
       //Feature 0 - on board
       setRowBin(rowBin,pos,0, 1.0f, posStride, featureStride);
 
+      //Feature 1 - who is next
+      assert(static_cast<int>(pla) - 1 == board.state.player);
+      float v = (pla == P_BLACK) ? 1.0 : 0.0;
+      setRowBin(rowBin,pos,1, v, posStride, featureStride);
+
+      //Features 2,3 - O, X stone
       Color stone = board.colors[loc];
-
-      //Features 1,2 - pla,opp stone
-      if(stone == pla)
-        setRowBin(rowBin,pos,1, 1.0f, posStride, featureStride);
-      else if(stone == opp)
+      if(stone == C_BLACK)
         setRowBin(rowBin,pos,2, 1.0f, posStride, featureStride);
+      else if(stone == C_WHITE)
+        setRowBin(rowBin,pos,3, 1.0f, posStride, featureStride);
     }
   }
 
-  // HAS TO BE IMPLEMENTED
-  //Feature 3 player all ff
-/*   {
-    Table loop = board.threatHandler.threat[(pla - 1)][0][0];
-
-    for (int dir = 1; dir < 4; dir++)
-    {
-      loop |= board.threatHandler.threat[(pla - 1)][0][dir];
-    }
-    while (!loop)
-		{
-			int sq = loop.bitScanForward();
-      setRowBin(rowBin, sq, 3, 1.0f, posStride, featureStride);
-			loop.t[sq >> 6] ^= (1ULL << (sq - ((sq >> 6) << 6)));
-    }
-  }
-  //Feature 4 opp all ff
+  //Feature 4 winThreat
   {
-    Table loop = board.threatHandler.threat[(pla - 1)^1][0][0];
-
-    for (int dir = 1; dir < 4; dir++)
-    {
-      loop |= board.threatHandler.threat[(pla - 1)^1][0][dir];
-    }
+    BitBoard loop = board.state.winThreat;
     while (!loop)
-		{
-			int sq = loop.bitScanForward();
+	  {
+	    int sq = loop.bitScanForward();
       setRowBin(rowBin, sq, 4, 1.0f, posStride, featureStride);
-			loop.t[sq >> 6] ^= (1ULL << (sq - ((sq >> 6) << 6)));
-    }
-  }  
-  //Feature 5, 6, 7, 8 play player ft-s
+		  loop.t[sq >> 6] ^= (1ULL << (sq - ((sq >> 6) << 6)));
+	  }
+  }
+
+  //Feature 5, 6, 7, 8 forcingMoves
   {
     for (int dir = 0; dir < 4; dir++)
     {
-      Table loop = board.threatHandler.threat[pla - 1][1][dir];
+      BitBoard loop = board.state.forcingMoves[dir];
       while (!loop)
 			{
 				int sq = loop.bitScanForward();
@@ -968,52 +952,20 @@ void NNInputs::fillRowV7(
 			}
     }
   }
-  //Feature 9, 10, 11, 12 opp player ft-s
-  {
-    for (int dir = 0; dir < 4; dir++)
-    {
-      Table loop = board.threatHandler.threat[(pla - 1)^1][1][dir];
-      while (!loop)
-			{
-				int sq = loop.bitScanForward();
-        setRowBin(rowBin, sq, 9 + dir, 1.0f, posStride, featureStride);
-				loop.t[sq >> 6] ^= (1ULL << (sq - ((sq >> 6) << 6)));
-			}
-    }
-  }  
 
-  //Feature 13, 14, 15, 16 play player tt-s
+  //Feature 9 forks
   {
-    for (int dir = 0; dir < 4; dir++)
-    {
-      Table loop = board.threatHandler.threat[pla - 1][2][dir];
-      while (!loop)
-			{
-				int sq = loop.bitScanForward();
-        setRowBin(rowBin, sq, 13 + dir, 1.0f, posStride, featureStride);
-				loop.t[sq >> 6] ^= (1ULL << (sq - ((sq >> 6) << 6)));
-			}
-    }
-  }
-  //Feature 17, 18, 19, 20 opp player tt-s
-  {
-    for (int dir = 0; dir < 4; dir++)
-    {
-      Table loop = board.threatHandler.threat[(pla - 1)^1][2][dir];
-      while (!loop)
-			{
-				int sq = loop.bitScanForward();
-        setRowBin(rowBin, sq, 17 + dir, 1.0f, posStride, featureStride);
-				loop.t[sq >> 6] ^= (1ULL << (sq - ((sq >> 6) << 6)));
-			}
-    }
-  }  
-
+    BitBoard loop = board.state.forks;
+    while (!loop)
+	  {
+	    int sq = loop.bitScanForward();
+      setRowBin(rowBin, sq, 9, 1.0f, posStride, featureStride);
+		  loop.t[sq >> 6] ^= (1ULL << (sq - ((sq >> 6) << 6)));
+	  }
+  } 
+  //Features 10 last move
   //Hide history if the game is in fact over right now!
-  bool hideHistory =
-    hist.isGameFinished;
-
-  //Features 21 last move
+  bool hideHistory = hist.isGameFinished;
   if(!hideHistory) {
     const vector<Move>& moveHistory = hist.moveHistory;
     size_t moveHistoryLen = moveHistory.size();
@@ -1025,10 +977,12 @@ void NNInputs::fillRowV7(
       Loc prev1Loc = moveHistory[moveHistoryLen-1].loc;
       if(prev1Loc != Board::NULL_LOC) {
         int pos = NNPos::locToPos(prev1Loc,xSize,nnXLen,nnYLen);
-        setRowBin(rowBin,pos, 21, 1.0f, posStride, featureStride);
+        setRowBin(rowBin,pos, 10, 1.0f, posStride, featureStride);
       }
     }
-  } */
-  //Global features. NOT USED
-  // rowGlobal[0] = 1.0f;
+  } 
+
+  const auto& ws = Board::getWinningSets();
+  int all = ws[0].size() + ws[1].size() + ws[2].size() + ws[3].size();
+  rowGlobal[0] =  float(board.state.winningSetsLeft) / float(all);
 }

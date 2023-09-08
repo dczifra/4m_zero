@@ -238,7 +238,7 @@ void BoardHistory::makeBoardMoveAssumeLegal(Board& board, Loc moveLoc, Player mo
   numTurns += 1;
   presumedNextMovePla = getOpp(movePla);
   wasEverOccupiedOrPlayed[moveLoc] = true;
-  if (board.state.OFork)
+  if ((!board.state.forks) && board.state.player == 0)
   {
     endGameNow(P_BLACK);
   }

@@ -729,10 +729,11 @@ void Board::printBoard(ostream& out, const Board& board, Loc markLoc, const vect
     out << "for dir=" << dir << " forcingMoves=\n";
     s.forcingMoves[dir].print(out);
   }
+  out << "forks=\n";
+  s.forks.print(out);
   out << "winningSetsLeft=" << s.winningSetsLeft << "\n";
   out << "legal=\n";
   s.legal.print(out);
-  out << "OFork=" << s.OFork << "\n";
 }
 
 ostream& operator<<(ostream& out, const Board& board) {
@@ -805,7 +806,8 @@ void Board::updateState()
 {
 	const auto& winningSets = getWinningSets();
 	int p = num_stones % 2; // player on move 0 = O, 1 = X
-    state.O.null();
+  state.player = p;
+  state.O.null();
 	state.X.null();
 	state.winThreat.null();
 	for (int i = 0; i < 4; i++)
@@ -814,7 +816,7 @@ void Board::updateState()
 	}
 	state.winningSetsLeft = 0;
 	state.legal.null();
-  state.OFork = false;
+  state.forks.null();
 	
   BitBoard empty;
   empty.null();
@@ -855,19 +857,16 @@ void Board::updateState()
 		}
 	}
 
-  if (p == 0)
+  for (int d1 = 0; d1 < 4; d1++)
   {
-    for (int d1 = 0; d1 < 4; d1++)
+    for (int d2 = d1 + 1; d2 < 4; d2++)
     {
-      for (int d2 = d1 + 1; d2 < 4; d2++)
-      {
-        auto fork = (state.forcingMoves[d1] & state.forcingMoves[d2]);
-        if ((!fork))
-        {
-          state.OFork = true;
-        }
-      }
+      auto fork = (state.forcingMoves[d1] & state.forcingMoves[d2]);
+      state.forks |= fork;
     }
+  }
+  if (p == 0)
+  {    
     if (state.winningSetsLeft == 0)
     {
       state.legal.null();
@@ -879,7 +878,6 @@ void Board::updateState()
   }
   if (p == 1)
   {
-    state.OFork = false;
     int w = state.winThreat.count();
     if (w == 0)
     {

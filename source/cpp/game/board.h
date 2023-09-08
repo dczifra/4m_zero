@@ -141,7 +141,8 @@ struct State
 	BitBoard forcingMoves[4]; //0 == E, 1 == N, 2 == NE, 3 == NW
 	int winningSetsLeft;
 	BitBoard legal;
-	bool OFork;
+	BitBoard forks;
+	int player; // 0 == O, 1 == X 
 };
 
 
