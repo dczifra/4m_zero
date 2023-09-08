@@ -106,12 +106,12 @@ bool Location::isCentral(Loc loc, int x_size, int y_size) {
 
 Board::Board()
 {
-  init(4, 20);
+  init(RULE_M, 4);
 }
 
-Board::Board(int x, int y)
+Board::Board(int /*x*/, int /*y*/)
 {
-  init(x,y);
+  init(RULE_M, 4);
 }
 
 Board::Board(const Board& other)
@@ -194,9 +194,9 @@ void Board::initBoardStruct()
   IS_INITALIZED = true;
 }
 
-std::vector<std::vector<BitBoard>> getWinningSetsImpl()
+static std::vector<std::vector<BitBoard>> getWinningSetsImpl()
 {
-	int m = M_LEN;
+	int m = RULE_M;
 	std::vector<std::vector<BitBoard>> ret(4);
 	return ret;		
 }
@@ -375,8 +375,8 @@ int Location::euclideanDistanceSquared(Loc loc0, Loc loc1, int x_size) {
 char PlayerIO::colorToChar(Color c)
 {
   switch(c) {
-  case C_BLACK: return 'X';
-  case C_WHITE: return 'O';
+  case C_BLACK: return 'O';
+  case C_WHITE: return 'X';
   case C_EMPTY: return '.';
   default:  return '#';
   }
@@ -606,6 +606,7 @@ void Board::printBoard(ostream& out, const Board& board, Loc markLoc, const vect
     }
     out << "\n";
   }
+  board.state.O.print(out);
 }
 
 ostream& operator<<(ostream& out, const Board& board) {

@@ -14,7 +14,7 @@
 #define COMPILE_MAX_BOARD_LEN 20
 #endif
 
-#define M_LEN COMPILE_MAX_BOARD_LEN
+#define RULE_M COMPILE_MAX_BOARD_LEN
 
 #define TIDX(a) ((a) >> 6)
 #define BITINDEX(a) ((a) - (((a) >> 6) << 6))
@@ -106,28 +106,29 @@ struct BitBoard
 		return __builtin_popcountll(t[0]) + __builtin_popcountll(t[1]);
 	}
 
-	void print(int m)
+	void print(std::ostream& out) const
 	{
+		int m = RULE_M;
 		int i;
 		
 		for (i = 0; i < 4 * m; i++)
 		{
 			if ((t[i >> 6] & (1ULL << (i - ((i >> 6) << 6)))) != 0)
 			{
-				printf("1 ");
+				out << "1 ";
 				if (i % m == m - 1)
 				{
-					printf("\n");
+					out << "\n";
 				}
 				continue;
 			}
-			printf("0 ");
+			out << "0 ";
 			if (i % m == m - 1)
 			{
-				printf("\n");
+				out <<"\n";
 			}
 		}
-		printf("\n");
+		out << "\n";
 	}
 };
 
