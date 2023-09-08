@@ -31,11 +31,11 @@ sekiForkHackProb = 0.02
 
 # Otherwise, play some proportion of games starting from SGF positions, with randomized rules (ignoring the sgf rules)
 # On SGF positions, high temperature policy init is allowed
-startPosesProb = 1.0  # Play this proportion of games starting from SGF positions
-startPosesFromSgfDir = @SGF_FOLDER@  # Load SGFs from this dir
-startPosesLoadProb = 1.0  # Only load each position from each SGF with this chance (save memory)
-startPosesTurnWeightLambda = 0  # 0 = equal weight  0.01 = decrease probability by 1% per turn  -0.01 = increase probability by 1% per turn.
-startPosesPolicyInitAreaProp = 0.0  # Same as policyInitAreaProp but for SGF positions
+#startPosesProb = 1.0  # Play this proportion of games starting from SGF positions
+#startPosesFromSgfDir = @SGF_FOLDER@  # Load SGFs from this dir
+#startPosesLoadProb = 1.0  # Only load each position from each SGF with this chance (save memory)
+#startPosesTurnWeightLambda = 0  # 0 = equal weight  0.01 = decrease probability by 1% per turn  -0.01 = increase probability by 1% per turn.
+#startPosesPolicyInitAreaProp = 0.0  # Same as policyInitAreaProp but for SGF positions
 
 # Otherwise, play some proportion of games starting from hint positions (generated using "dataminesgfs" command), with randomized rules.
 # On hint positions, "initGamesWithPolicy" does not apply.
