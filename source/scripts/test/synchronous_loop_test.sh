@@ -77,7 +77,7 @@ DATE_FOR_FILENAME=$(date "+%Y%m%d-%H%M%S")
 DATED_ARCHIVE="$BASEDIR"/scripts/dated/"$DATE_FOR_FILENAME"
 mkdir -p "$DATED_ARCHIVE"
 cp "$GITROOTDIR"/python/*.py "$GITROOTDIR"/python/selfplay/*.sh "$DATED_ARCHIVE"
-cp ${BUILD_FOLDER}/bin/barbakan_zero "$DATED_ARCHIVE"
+cp ${BUILD_FOLDER}/bin/4m_zero "$DATED_ARCHIVE"
 cp "$SELFPLAY_CONFIG" "$DATED_ARCHIVE"/selfplay.cfg
 cp "$GATING_CONFIG" "$DATED_ARCHIVE"/gatekeeper.cfg
 git show --no-patch --no-color > "$DATED_ARCHIVE"/version.txt
@@ -93,7 +93,7 @@ COUNTER=0
 while true
 do
     echo "Gatekeeper"
-    time ./barbakan_zero gatekeeper -rejected-models-dir "$BASEDIR"/rejectedmodels -accepted-models-dir "$BASEDIR"/models/ -sgf-output-dir "$BASEDIR"/gatekeepersgf/ -test-models-dir "$BASEDIR"/modelstobetested/ -config "$DATED_ARCHIVE"/gatekeeper.cfg -quit-if-no-nets-to-test | tee -a "$BASEDIR"/gatekeepersgf/stdout.txt
+    time ./4m_zero gatekeeper -rejected-models-dir "$BASEDIR"/rejectedmodels -accepted-models-dir "$BASEDIR"/models/ -sgf-output-dir "$BASEDIR"/gatekeepersgf/ -test-models-dir "$BASEDIR"/modelstobetested/ -config "$DATED_ARCHIVE"/gatekeeper.cfg -quit-if-no-nets-to-test | tee -a "$BASEDIR"/gatekeepersgf/stdout.txt
     if [ -z "$(ls -A "$SELFPLAY_FOLDER/models")" ] && [ -z "$(ls -A "$SELFPLAY_FOLDER/rejectedmodels")" ]; then
         if (( $COUNTER > 2 )); then
             echo "Could not create model in $SELFPLAY_FOLDER/models"
@@ -105,7 +105,7 @@ do
     fi
 
     echo "Selfplay"
-    time ./barbakan_zero selfplay -max-games-total "$NUM_GAMES_PER_CYCLE" -output-dir "$BASEDIR"/selfplay -models-dir "$BASEDIR"/models -config "$DATED_ARCHIVE"/selfplay.cfg | tee -a "$BASEDIR"/selfplay/stdout.txt
+    time ./4m_zero selfplay -max-games-total "$NUM_GAMES_PER_CYCLE" -output-dir "$BASEDIR"/selfplay -models-dir "$BASEDIR"/models -config "$DATED_ARCHIVE"/selfplay.cfg | tee -a "$BASEDIR"/selfplay/stdout.txt
 
     echo "Shuffle"
     (
