@@ -723,7 +723,7 @@ void Board::printBoard(ostream& out, const Board& board, Loc markLoc, const vect
   s.O.print(out);
   out << "X=\n";
   s.X.print(out);
-  out << "winThreat=";
+  out << "winThreat=\n";
   s.winThreat.print(out);
   for (int dir = 0; dir < 4; dir++)
   {
@@ -731,7 +731,7 @@ void Board::printBoard(ostream& out, const Board& board, Loc markLoc, const vect
     s.forcingMoves[dir].print(out);
   }
   out << "winningSetsLeft=" << s.winningSetsLeft << "\n";
-  out << "legal=";
+  out << "legal=\n";
   s.legal.print(out);
   out << "OFork=" << s.OFork << "\n";
 }
@@ -836,7 +836,7 @@ void Board::updateState()
 		for (const auto& winningSet : winningSets[dir])
 		{
       
-      if (!(state.X & winningSet))
+      if (!(!(state.X & winningSet)))
       {
         state.winningSetsLeft++;
         int winningSetSize = winningSet.count();
@@ -864,7 +864,7 @@ void Board::updateState()
       for (int d2 = d1 + 1; d2 < 4; d2++)
       {
         auto fork = (state.forcingMoves[d1] & state.forcingMoves[d2]);
-        if (!(!fork))
+        if ((!fork))
         {
           state.OFork = true;
         }
