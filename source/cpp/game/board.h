@@ -11,12 +11,10 @@
 #include "../core/hash.h"
 
 #ifndef COMPILE_MAX_BOARD_LEN
-#define COMPILE_MAX_BOARD_LEN 19
+#define COMPILE_MAX_BOARD_LEN 20
 #endif
 
-#define MAX_LEN_THREATHANDLER COMPILE_MAX_BOARD_LEN
-#define NO_FIVE (-1) 
-#define FIVE_WIN (10000)
+#define M_LEN COMPILE_MAX_BOARD_LEN
 
 struct Table
 {
@@ -25,15 +23,15 @@ struct Table
     Table& operator=(const Table&) = default;
 
 	static const int index64[64];
-	uint64_t t[8];
+	uint64_t t[2];
 	
 	inline void null()
 	{
-		this -> t[0] = this -> t[1] = this -> t[2] = this -> t[3] = this -> t[4] = this -> t[5] = this -> t[6] = this -> t[7] = 0; 
+		this -> t[0] = this -> t[1] = 0; 
 	}	
 	inline bool operator!()
 	{
-		if (this -> t[0] != 0 || this -> t[1] != 0 || this -> t[2] != 0 || this -> t[3] != 0 || this -> t[4] != 0 || this -> t[5] != 0 || this -> t[6] != 0 || this -> t[7] != 0)
+		if (this -> t[0] != 0 || this -> t[1] != 0)
 		{
 			return true;
 		}
@@ -41,7 +39,7 @@ struct Table
 	}
 	inline bool operator==(const Table& rhs)
 	{
-		if (this -> t[0] == rhs.t[0] && this -> t[1] == rhs.t[1] && this -> t[2] == rhs.t[2] && this -> t[3] == rhs.t[3] && this -> t[4] == rhs.t[4] && this -> t[5] == rhs.t[5] && this -> t[6] == rhs.t[6] && this -> t[7] == rhs.t[7])
+		if (this -> t[0] == rhs.t[0] && this -> t[1] == rhs.t[1])
 		{
 			return true;
 		}
@@ -49,7 +47,7 @@ struct Table
 	}
 	inline bool operator!=(const Table& rhs)
 	{
-		if (this -> t[0] == rhs.t[0] && this -> t[1] == rhs.t[1] && this -> t[2] == rhs.t[2] && this -> t[3] == rhs.t[3] && this -> t[4] == rhs.t[4] && this -> t[5] == rhs.t[5] && this -> t[6] == rhs.t[6] && this -> t[7] == rhs.t[7])
+		if (this -> t[0] == rhs.t[0] && this -> t[1] == rhs.t[1])
 		{
 			return false;
 		}
@@ -59,12 +57,6 @@ struct Table
 	{
 		this -> t[0] |= rhs.t[0];
 		this -> t[1] |= rhs.t[1];
-		this -> t[2] |= rhs.t[2];
-		this -> t[3] |= rhs.t[3];
-		this -> t[4] |= rhs.t[4];
-		this -> t[5] |= rhs.t[5];
-		this -> t[6] |= rhs.t[6];
-		this -> t[7] |= rhs.t[7];
 		return * this;
 	}
 	inline Table operator~()
@@ -72,12 +64,6 @@ struct Table
 		Table ret;
 		ret.t[0] = (~(this->t[0]));
 		ret.t[1] = (~(this->t[1]));
-		ret.t[2] = (~(this->t[2]));
-		ret.t[3] = (~(this->t[3]));
-		ret.t[4] = (~(this->t[4]));
-		ret.t[5] = (~(this->t[5]));
-		ret.t[6] = (~(this->t[6]));
-		ret.t[7] = (~(this->t[7]));
 		return ret;
 	}
 	inline Table operator&(const Table& rhs)
@@ -85,12 +71,6 @@ struct Table
 		Table ret;
 		ret.t[0] = (this -> t[0] & rhs.t[0]);
 		ret.t[1] = (this -> t[1] & rhs.t[1]);
-		ret.t[2] = (this -> t[2] & rhs.t[2]);
-		ret.t[3] = (this -> t[3] & rhs.t[3]);
-		ret.t[4] = (this -> t[4] & rhs.t[4]);
-		ret.t[5] = (this -> t[5] & rhs.t[5]);
-		ret.t[6] = (this -> t[6] & rhs.t[6]);
-		ret.t[7] = (this -> t[7] & rhs.t[7]);
 		return ret;
 	}
 	inline Table operator|(const Table& rhs)
@@ -98,12 +78,6 @@ struct Table
 		Table ret;
 		ret.t[0] = (this -> t[0] | rhs.t[0]);
 		ret.t[1] = (this -> t[1] | rhs.t[1]);
-		ret.t[2] = (this -> t[2] | rhs.t[2]);
-		ret.t[3] = (this -> t[3] | rhs.t[3]);
-		ret.t[4] = (this -> t[4] | rhs.t[4]);
-		ret.t[5] = (this -> t[5] | rhs.t[5]);
-		ret.t[6] = (this -> t[6] | rhs.t[6]);
-		ret.t[7] = (this -> t[7] | rhs.t[7]);
 		return ret;
 	}
 	inline int bitScanForward() 
@@ -117,56 +91,47 @@ struct Table
 		{
 			return index64[((t[1] ^ (t[1] - 1)) * (0x03f79d71b4cb0a89)) >> 58] + 64;
 		}
-		if (t[2] != 0)
-		{
-			return index64[((t[2] ^ (t[2] - 1)) * (0x03f79d71b4cb0a89)) >> 58] + 128;
-		}
-		if (t[3] != 0)
-		{
-			return index64[((t[3] ^ (t[3] - 1)) * (0x03f79d71b4cb0a89)) >> 58] + 192;
-		}
-		if (t[4] != 0)
-		{
-			return index64[((t[4] ^ (t[4] - 1)) * (0x03f79d71b4cb0a89)) >> 58] + 256;
-		}
-		if (t[5] != 0)
-		{
-			return index64[((t[5] ^ (t[5] - 1)) * (0x03f79d71b4cb0a89)) >> 58] + 320;
-		}
-		if (t[6] != 0)
-		{
-			return index64[((t[6] ^ (t[6] - 1)) * (0x03f79d71b4cb0a89)) >> 58] + 384;
-		}
-		if (t[7] != 0)
-		{
-			return index64[((t[7] ^ (t[7] - 1)) * (0x03f79d71b4cb0a89)) >> 58] + 448;
-		}
 		return -1;
 	}
+	inline int count()
+	{
+		return __builtin_popcountll(t[0]) + __builtin_popcountll(t[1]);
+	}
 
-	void print(int boardSize)
+	void print(int m)
 	{
 		int i;
 		
-		for (i = 0; i < boardSize * boardSize; i++)
+		for (i = 0; i < 4 * m; i++)
 		{
 			if ((t[i >> 6] & (1ULL << (i - ((i >> 6) << 6)))) != 0)
 			{
 				printf("1 ");
-				if (i % boardSize == boardSize - 1)
+				if (i % m == m - 1)
 				{
 					printf("\n");
 				}
 				continue;
 			}
 			printf("0 ");
-			if (i % boardSize == boardSize - 1)
+			if (i % m == m - 1)
 			{
 				printf("\n");
 			}
 		}
 		printf("\n");
 	}
+};
+
+// This will after inint and every times Board.colors is changing
+struct State
+{
+	Table O;
+	Table X;
+	Table threat;
+	Table forceMoves[4];
+	int winningSetsLeft;
+	Table legal;
 };
 
 
@@ -312,15 +277,14 @@ struct Board
   static Board parseBoard(int xSize, int ySize, const std::string& s, char lineDelimiter);
   static void printBoard(std::ostream& out, const Board& board, Loc markLoc, const std::vector<Move>* hist);
   static std::string toStringSimple(const Board& board, char lineDelimiter);
-
+  static const std::vector<std::vector<Table>>& getWinningSets();
   //Data--------------------------------------------
 
   int x_size;                  //Horizontal size of board
   int y_size;                  //Vertical size of board
   Color colors[MAX_ARR_SIZE];  //Color of each location on the board
   int num_stones;              //Number of stones on the board
-
-  /* PointList empty_list; //List of all empty locations on board */
+  State state;                 //This could be incrementally computed
 
   Hash128 pos_hash; //A zobrist hash of the current board position (does not include player to move)
   short adj_offsets[8]; //Indices 0-3: Offsets to add for adjacent points. Indices 4-7: Offsets for diagonal points. 2 and 3 are +x and +y.
@@ -328,6 +292,7 @@ struct Board
   private:
   void init(int xS, int yS);
   void removeSingleStone(Loc loc);
+  void updateState();
 
   friend std::ostream& operator<<(std::ostream& out, const Board& board);
 };

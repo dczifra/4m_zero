@@ -106,7 +106,7 @@ bool Location::isCentral(Loc loc, int x_size, int y_size) {
 
 Board::Board()
 {
-  init(19,19);
+  init(4, 20);
 }
 
 Board::Board(int x, int y)
@@ -122,6 +122,7 @@ Board::Board(const Board& other)
   memcpy(colors, other.colors, sizeof(Color)*MAX_ARR_SIZE);
   num_stones = other.num_stones;
   pos_hash = other.pos_hash;
+  state = other.state;
 
   memcpy(adj_offsets, other.adj_offsets, sizeof(short)*8);
 }
@@ -150,7 +151,7 @@ void Board::init(int xS, int yS)
 
   num_stones = 0;
   pos_hash = ZOBRIST_SIZE_X_HASH[x_size] ^ ZOBRIST_SIZE_Y_HASH[y_size];
-
+  updateState();
   Location::getAdjacentOffsets(adj_offsets,x_size);
 }
 
@@ -189,8 +190,21 @@ void Board::initBoardStruct()
     ZOBRIST_SIZE_X_HASH[i] = nextHash();
     ZOBRIST_SIZE_Y_HASH[i] = nextHash();
   }
-
+  getWinningSets();
   IS_INITALIZED = true;
+}
+
+std::vector<std::vector<Table>> getWinningSetsImpl()
+{
+	int m = M_LEN;
+	std::vector<std::vector<Table>> ret(4);
+	return ret;		
+}
+
+const std::vector<std::vector<Table>>& Board::getWinningSets()
+{
+	static std::vector<std::vector<Table>> ret = getWinningSetsImpl();
+	return ret;
 }
 
 bool Board::isOnBoard(Loc loc) const {
@@ -204,7 +218,11 @@ bool Board::isLegal(Loc loc, Player /*pla*/) const
 	{
 		return false;
 	}
-	return false; // HAS TO BE IMPLEMENTED
+	if (colors[loc] != C_EMPTY)
+	{
+		return false;
+	}
+	return true;
 }
 
 bool Board::isAdjacentToPla(Loc loc, Player pla) const {
@@ -279,6 +297,7 @@ void Board::removeSingleStone(Loc loc)
   pos_hash ^= ZOBRIST_BOARD_HASH[loc][colors[loc]];
   colors[loc] = C_EMPTY;
   num_stones -= 1;
+  updateState();
 }
 
 
@@ -313,6 +332,7 @@ void Board::undo(Board::MoveRecord record)
   pos_hash ^= ZOBRIST_BOARD_HASH[loc][colors[loc]];
   colors[loc] = C_EMPTY;
   num_stones -= 1;
+  updateState();
 }
 
 Hash128 Board::getPosHashAfterMove(Loc loc, Player pla) const {
@@ -329,8 +349,10 @@ void Board::playMoveAssumeLegal(Loc loc, Player pla)
 {
   //Add the new stone 
   colors[loc] = pla;
+  // calc states
   pos_hash ^= ZOBRIST_BOARD_HASH[loc][pla];
   num_stones += 1;
+  updateState();
 }
 
 int Location::distance(Loc loc0, Loc loc1, int x_size) {
@@ -650,4 +672,9 @@ Board Board::parseBoard(int xSize, int ySize, const string& s, char lineDelimite
     }
   }
   return board;
+}
+
+void Board::updateState()
+{
+	return;
 }

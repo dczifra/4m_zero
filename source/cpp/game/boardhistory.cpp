@@ -238,15 +238,9 @@ void BoardHistory::makeBoardMoveAssumeLegal(Board& board, Loc moveLoc, Player mo
   numTurns += 1;
   presumedNextMovePla = getOpp(movePla);
   wasEverOccupiedOrPlayed[moveLoc] = true;
-
-  // If board is full, and we assume that the play was egal, then the last move could not be winning -> the result is draw 
-  if (board.isFull() == true)
+  if (!(board.state.legal))
   {
-      endGameNow(C_EMPTY);
-      return;
+    endGameNow(movePla);
   }
-  
-  // HAS TO BE IMPLEMENTED
-  // Generate legal moves. Call endGameNow according to result.
   return;
 }
