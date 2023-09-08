@@ -222,6 +222,7 @@ bool BoardHistory::makeBoardMoveTolerant(Board& board, Loc moveLoc, Player moveP
 
 void BoardHistory::makeBoardMoveAssumeLegal(Board& board, Loc moveLoc, Player movePla) {
   //If somehow we're making a move after the game was ended, just clear those values and continue
+  // HAS TO BE IMPLEMENTED?
   isGameFinished = false;
   winner = C_EMPTY;
   isNoResult = false;

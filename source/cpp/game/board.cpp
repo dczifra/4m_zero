@@ -196,9 +196,71 @@ void Board::initBoardStruct()
 
 static std::vector<std::vector<BitBoard>> getWinningSetsImpl()
 {
+	// HAS TO BE IMPLEMENTED
 	int m = RULE_M;
 	std::vector<std::vector<BitBoard>> ret(4);
-	return ret;		
+
+	//0 == E, 1 == N, 2 == NE, 3 == NW
+	// E
+	std::vector<BitBoard> curr;
+	curr.clear();
+	for(int y = 0; y<4; y++) {
+      for(int x = 0; x<m; x++) {
+		BitBoard currWinningSet;
+		currWinningSet.null();
+		if (x + 6 <= m - 1)
+		{
+			for (int t = 0; t < 7; t++)
+			{
+				EXPAND(currWinningSet, y * m + x + t);
+			}
+			curr.push_back(currWinningSet);
+		}
+      }
+    }
+	ret[0] = curr;
+
+	// N
+	curr.clear();
+	for(int x = 0; x<m; x++) {
+		BitBoard currWinningSet;
+		currWinningSet.null();
+		for (int t = 0; t < 4; ++t)
+		{
+			EXPAND(currWinningSet, x + t * m);
+		}
+		curr.push_back(currWinningSet);
+    }
+	ret[1] = curr;
+
+	// NE
+	curr.clear();
+	for(int x = 3; x<m; x++) {
+		BitBoard currWinningSet;
+		currWinningSet.null();
+		for (int t = 0; t < 4; ++t)
+		{
+			EXPAND(currWinningSet, x + (m - 1) * t);
+		}
+		curr.push_back(currWinningSet);
+    }
+	ret[2] = curr;
+
+	// NW
+	curr.clear();
+	for(int x = 0; x<= m - 4; x++) {
+		BitBoard currWinningSet;
+		currWinningSet.null();
+		for (int t = 0; t < 4; ++t)
+		{
+			EXPAND(currWinningSet, x + (m + 1) * t);
+		}
+		curr.push_back(currWinningSet);
+    }
+	ret[3] = curr;
+
+	// Shorts
+	return ret;	
 }
 
 const std::vector<std::vector<BitBoard>>& Board::getWinningSets()
@@ -606,7 +668,16 @@ void Board::printBoard(ostream& out, const Board& board, Loc markLoc, const vect
     }
     out << "\n";
   }
-  board.state.O.print(out);
+  //board.state.O.print(out);
+  const auto& t = Board::getWinningSets();
+  for (int i = 0; i < 4; i++)
+  {
+	for (int j = 0; j < t[i].size(); j++)
+	{
+		t[i][j].print(out);
+		out << "\n";
+	}
+  }
 }
 
 ostream& operator<<(ostream& out, const Board& board) {
@@ -677,10 +748,12 @@ Board Board::parseBoard(int xSize, int ySize, const string& s, char lineDelimite
 
 void Board::updateState()
 {
+	// HAS TO BE IMPLEMENTED
 	const auto& winningSets = getWinningSets();
 	int p = num_stones % 2; // player on move 0 = O, 1 = X
     state.O.null();
 	state.X.null();
+	state.winThreat.null();
 	
 	for(int y = 0; y<y_size; y++) {
       for(int x = 0; x<x_size; x++) {
@@ -691,5 +764,7 @@ void Board::updateState()
           EXPAND(state.X, y * x_size + x);
       }
     }
+
+
 	return;
 }
