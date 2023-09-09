@@ -825,20 +825,23 @@ void Board::updateState()
 	state.winningSetsLeft = 0;
 	state.legal.null();
   state.forks.null();
+  state.candidateMoves.null();
+  uint8_t winSetCounts[4 * RULE_M];
+  std::fill(winSetCounts, winSetCounts + 4 * RULE_M, 0);
 	
   BitBoard empty;
   empty.null();
 	for(int y = 0; y<y_size; y++) {
-      for(int x = 0; x<x_size; x++) {
-        Loc loc = Location::getLoc(x,y,x_size);
-        if(colors[loc] == C_BLACK)
-          EXPAND(state.O, y * x_size + x);
-        else if (colors[loc] == C_WHITE)
-          EXPAND(state.X, y * x_size + x);
-        else
-          EXPAND(empty, y * x_size + x);
-      }
+    for(int x = 0; x<x_size; x++) {
+      Loc loc = Location::getLoc(x,y,x_size);
+      if(colors[loc] == C_BLACK)
+        EXPAND(state.O, y * x_size + x);
+      else if (colors[loc] == C_WHITE)
+        EXPAND(state.X, y * x_size + x);
+      else
+        EXPAND(empty, y * x_size + x);
     }
+  }
 	for (int dir = 0; dir < 4; dir++)
 	{
 		for (const auto& winningSet : winningSets[dir])
@@ -850,21 +853,28 @@ void Board::updateState()
         int winningSetSize = winningSet.count();
         BitBoard intersect = (state.O & winningSet);
         int intersectSize = intersect.count();
+        BitBoard possibleAttackMovesOfSet = (empty & winningSet);
         if (intersectSize == winningSetSize - 1)
         {
           if (p == 1)
           {
-            state.winThreat |= (empty & winningSet); 
+            state.winThreat |= possibleAttackMovesOfSet; 
           }
         }
         if (intersectSize == winningSetSize - 2)
         {
-          state.forcingMoves[dir] |= (empty & winningSet);
+          state.forcingMoves[dir] |= possibleAttackMovesOfSet;
         }
+        while (!possibleAttackMovesOfSet)
+	      {
+	        int sq = possibleAttackMovesOfSet.bitScanForward();
+          winSetCounts[sq]++;
+		      possibleAttackMovesOfSet.t[sq >> 6] ^= (1ULL << (sq - ((sq >> 6) << 6)));
+	      }
       }
 		}
 	}
-
+  // calc forks
   for (int d1 = 0; d1 < 4; d1++)
   {
     for (int d2 = d1 + 1; d2 < 4; d2++)
@@ -873,6 +883,17 @@ void Board::updateState()
       state.forks |= fork;
     }
   }
+
+  // calc candidate moves
+  state.candidateMoves = state.winThreat;
+  for (int i = 0; i < 4 * RULE_M; i++)
+  {
+    if (winSetCounts[i] >= 2)
+    {
+      EXPAND(state.candidateMoves, i);
+    }
+  }
+
   if (p == 0)
   {    
     if (state.winningSetsLeft == 0)
@@ -885,7 +906,7 @@ void Board::updateState()
     }
     else
     {
-      state.legal = empty;
+      state.legal = state.candidateMoves;
     }
   }
   if (p == 1)
@@ -893,7 +914,14 @@ void Board::updateState()
     int w = state.winThreat.count();
     if (w == 0)
     {
-      state.legal = empty;
+      if (!(state.candidateMoves))
+      {
+        state.legal = state.candidateMoves;
+      }
+      else
+      {
+        state.legal = empty; // Defender will win in the next move
+      }
     }
     else if (w == 1)
     {

@@ -142,6 +142,7 @@ struct State
 	int winningSetsLeft;
 	BitBoard legal;
 	BitBoard forks;
+	BitBoard candidateMoves; // TRICKY: a move is candidate only if it is part of at least two alive winning sets, or defending a win threat
 	int player; // 0 == O, 1 == X 
 };
 
