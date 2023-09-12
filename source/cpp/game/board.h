@@ -137,9 +137,11 @@ struct State
 {
 	BitBoard O;
 	BitBoard X;
-	BitBoard winThreat; // Only O is threatening
-	BitBoard forcingMoves[4]; //0 == E, 1 == N, 2 == NE, 3 == NW
-	int winningSetsLeft;
+	BitBoard winThreatO;
+	BitBoard winThreatX; // Horizontally X can also attack 
+	BitBoard forcingMovesO[4]; //0 == E, 1 == N, 2 == NE, 3 == NW
+	BitBoard forcingMovesX; // This is always horizontal
+	int winningSetsLeftO;
 	BitBoard legal;
 	BitBoard forks;
 	BitBoard candidateMoves; // TRICKY: a move is candidate only if it is part of at least two alive winning sets, or defending a win threat

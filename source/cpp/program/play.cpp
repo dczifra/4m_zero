@@ -478,7 +478,7 @@ void GameInitializer::createGameSharedUnsynchronized(
   const InitialPosition* initialPosition,
   const PlaySettings& playSettings,
   OtherGameProperties& otherGameProps,
-  const Sgf::PositionSample* startPosSample, bool forGateKeeper, int gameNumber
+  const Sgf::PositionSample* startPosSample, bool /*forGateKeeper*/, int gameNumber
 ) {
   if(initialPosition != NULL) {
     board = initialPosition->board;

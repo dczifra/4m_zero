@@ -730,16 +730,16 @@ void Board::printBoard(ostream& out, const Board& board, Loc markLoc, const vect
   s.O.print(out);
   out << "X=\n";
   s.X.print(out);
-  out << "winThreat=\n";
-  s.winThreat.print(out);
+  out << "winThreatO=\n";
+  s.winThreatO.print(out);
   for (int dir = 0; dir < 4; dir++)
   {
-    out << "for dir=" << dir << " forcingMoves=\n";
-    s.forcingMoves[dir].print(out);
+    out << "for dir=" << dir << " forcingMovesO=\n";
+    s.forcingMovesO[dir].print(out);
   }
   out << "forks=\n";
   s.forks.print(out);
-  out << "winningSetsLeft=" << s.winningSetsLeft << "\n";
+  out << "winningSetsLeftO=" << s.winningSetsLeftO << "\n";
   out << "legal=\n";
   s.legal.print(out);
 }
@@ -817,17 +817,19 @@ void Board::updateState()
   state.player = p;
   state.O.null();
 	state.X.null();
-	state.winThreat.null();
+	state.winThreatO.null();
+  state.winThreatX.null();
 	for (int i = 0; i < 4; i++)
 	{
-		state.forcingMoves[i].null();
+		state.forcingMovesO[i].null();
 	}
-	state.winningSetsLeft = 0;
+  state.forcingMovesX.null();
+	state.winningSetsLeftO = 0;
 	state.legal.null();
   state.forks.null();
   state.candidateMoves.null();
-  uint8_t winSetCounts[4 * RULE_M];
-  std::fill(winSetCounts, winSetCounts + 4 * RULE_M, 0);
+  uint8_t candidateCounts[4 * RULE_M];
+  std::fill(candidateCounts, candidateCounts + 4 * RULE_M, 0);
 	
   BitBoard empty;
   empty.null();
@@ -846,11 +848,10 @@ void Board::updateState()
 	{
 		for (const auto& winningSet : winningSets[dir])
 		{
-      
+      int winningSetSize = winningSet.count();
       if (!(!(state.X & winningSet)))
       {
-        state.winningSetsLeft++;
-        int winningSetSize = winningSet.count();
+        state.winningSetsLeftO++;
         BitBoard intersect = (state.O & winningSet);
         int intersectSize = intersect.count();
         BitBoard possibleAttackMovesOfSet = (empty & winningSet);
@@ -858,17 +859,45 @@ void Board::updateState()
         {
           if (p == 1)
           {
-            state.winThreat |= possibleAttackMovesOfSet; 
+            state.winThreatO |= possibleAttackMovesOfSet; 
           }
         }
         if (intersectSize == winningSetSize - 2)
         {
-          state.forcingMoves[dir] |= possibleAttackMovesOfSet;
+          state.forcingMovesO[dir] |= possibleAttackMovesOfSet;
         }
         while (!possibleAttackMovesOfSet)
 	      {
 	        int sq = possibleAttackMovesOfSet.bitScanForward();
-          winSetCounts[sq]++;
+          candidateCounts[sq]++;
+		      possibleAttackMovesOfSet.t[sq >> 6] ^= (1ULL << (sq - ((sq >> 6) << 6)));
+	      }
+      }
+      // X counter attack
+      if (winningSetSize == 7 && (!(!(state.O & winningSet))))
+      {
+        BitBoard intersect = (state.X & winningSet);
+        int intersectSize = intersect.count();
+        BitBoard possibleAttackMovesOfSet = (empty & winningSet);
+        if (intersectSize == winningSetSize - 1)
+        {
+          if (p == 0)
+          {
+            state.winThreatX |= possibleAttackMovesOfSet; 
+          }
+          else
+          {
+            ASSERT_UNREACHABLE;
+          }
+        }
+        if (intersectSize == winningSetSize - 2)
+        {
+          state.forcingMovesX |= possibleAttackMovesOfSet;
+        }
+        while (!possibleAttackMovesOfSet)
+	      {
+	        int sq = possibleAttackMovesOfSet.bitScanForward();
+          candidateCounts[sq]++;
 		      possibleAttackMovesOfSet.t[sq >> 6] ^= (1ULL << (sq - ((sq >> 6) << 6)));
 	      }
       }
@@ -879,16 +908,16 @@ void Board::updateState()
   {
     for (int d2 = d1 + 1; d2 < 4; d2++)
     {
-      auto fork = (state.forcingMoves[d1] & state.forcingMoves[d2]);
+      auto fork = (state.forcingMovesO[d1] & state.forcingMovesO[d2]);
       state.forks |= fork;
     }
   }
 
   // calc candidate moves
-  state.candidateMoves = state.winThreat;
+  state.candidateMoves = (p == 0) ? state.winThreatX : state.winThreatO;
   for (int i = 0; i < 4 * RULE_M; i++)
   {
-    if (winSetCounts[i] >= 2)
+    if (candidateCounts[i] >= 2)
     {
       EXPAND(state.candidateMoves, i);
     }
@@ -896,22 +925,33 @@ void Board::updateState()
 
   if (p == 0)
   {    
-    if (state.winningSetsLeft == 0)
+    int w = state.winThreatX.count();
+    if (state.winningSetsLeftO == 0)
     {
       state.legal.null();
     }
-    else if ((!state.forks))
+    else if (w == 0)
     {
-      state.legal = state.forks;
+      if ((!state.forks))
+      {
+        state.legal = state.forks;
+      }
+      else
+      {
+        state.legal = state.candidateMoves;
+      }
     }
-    else
+    else if (w == 1)
     {
-      state.legal = state.candidateMoves;
+      state.legal = state.winThreatX;
+    }
+    else{
+      state.legal.null();
     }
   }
   if (p == 1)
   {
-    int w = state.winThreat.count();
+    int w = state.winThreatO.count();
     if (w == 0)
     {
       if (!(state.candidateMoves))
@@ -925,7 +965,7 @@ void Board::updateState()
     }
     else if (w == 1)
     {
-      state.legal = state.winThreat;
+      state.legal = state.winThreatO;
     }
     else{
       state.legal.null();
