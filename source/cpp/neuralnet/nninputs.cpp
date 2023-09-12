@@ -928,9 +928,9 @@ void NNInputs::fillRowV7(
     }
   }
 
-  //Feature 4 winThreat
+  //Feature 4 winThreatO
   {
-    BitBoard loop = board.state.winThreat;
+    BitBoard loop = board.state.winThreatO;
     while (!loop)
 	  {
 	    int sq = loop.bitScanForward();
@@ -939,11 +939,11 @@ void NNInputs::fillRowV7(
 	  }
   }
 
-  //Feature 5, 6, 7, 8 forcingMoves
+  //Feature 5, 6, 7, 8 forcingMovesO
   {
     for (int dir = 0; dir < 4; dir++)
     {
-      BitBoard loop = board.state.forcingMoves[dir];
+      BitBoard loop = board.state.forcingMovesO[dir];
       while (!loop)
 			{
 				int sq = loop.bitScanForward();
@@ -980,9 +980,31 @@ void NNInputs::fillRowV7(
         setRowBin(rowBin,pos, 10, 1.0f, posStride, featureStride);
       }
     }
-  } 
+  }
+
+  //Feature 11 winThreatX
+  {
+    BitBoard loop = board.state.winThreatX;
+    while (!loop)
+	  {
+	    int sq = loop.bitScanForward();
+      setRowBin(rowBin, sq, 11, 1.0f, posStride, featureStride);
+		  loop.t[sq >> 6] ^= (1ULL << (sq - ((sq >> 6) << 6)));
+	  }
+  }
+
+  //Feature 12 forcingMovesX
+  {
+    BitBoard loop = board.state.forcingMovesX;
+    while (!loop)
+	  {
+	    int sq = loop.bitScanForward();
+      setRowBin(rowBin, sq, 12, 1.0f, posStride, featureStride);
+		  loop.t[sq >> 6] ^= (1ULL << (sq - ((sq >> 6) << 6)));
+	  }
+  }
 
   const auto& ws = Board::getWinningSets();
   int all = ws[0].size() + ws[1].size() + ws[2].size() + ws[3].size();
-  rowGlobal[0] =  float(board.state.winningSetsLeft) / float(all);
+  rowGlobal[0] =  float(board.state.winningSetsLeftO) / float(all);
 }
