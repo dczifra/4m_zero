@@ -6,8 +6,8 @@
 
 #include "../external/nlohmann_json/json.hpp"
 
-struct Rules {
-
+struct Rules
+{
   static const int KO_SIMPLE = 0;
   static const int KO_POSITIONAL = 1;
   static const int KO_SITUATIONAL = 2;
@@ -32,12 +32,13 @@ struct Rules {
   int whiteHandicapBonusRule;
 
   float komi;
-  //Min and max acceptable komi in various places involving user input validation
+  // Min and max acceptable komi in various places involving user input validation
   static constexpr float MIN_USER_KOMI = -150.0f;
   static constexpr float MAX_USER_KOMI = 150.0f;
 
   Rules();
-  Rules(int koRule, int scoringRule, int taxRule, bool multiStoneSuicideLegal, bool hasButton, int whiteHandicapBonusRule, float komi);
+  Rules(int koRule, int scoringRule, int taxRule, bool multiStoneSuicideLegal, bool hasButton,
+        int whiteHandicapBonusRule, float komi);
   ~Rules();
 
   bool operator==(const Rules& other) const;
