@@ -54,3 +54,27 @@ The training process hyperparameters are determined by the following files:
 ./data/configs/selfplay/selfplay_train.cfg.in  
 ./source/scripts/train/synchronous_loop.sh  
 It is possible that as the training process evolves, some changes are needed in the constants. (e.g. one can try to experiment with NUM_GAMES_PER_CYCLE or surewinDepth etc.)
+
+# Docker
+The root (of this repository) is mounted to the /workspace folder in the container.
+So anything you have here, you will have there, and everything you make there, will be here as well.
+But any other files on your host computer wont be visible in the container.
+(You can add/"mount" other folders as well, with changing the ./docker/run.sh script)
+
+[Build image -- not obligatory, if your machine the image already exists]
+```
+./docker/build.sh
+```
+
+Run cotainer:
+```
+./docker/build.sh
+```
+
+Build repo and tests:
+```
+git config --global --add safe.directory /workspace
+./source/scripts/configure.sh release
+./source/scripts/build.sh release
+./source/scripts/test.sh release
+```
